@@ -1,0 +1,241 @@
+/* Custom styles for BTMM Trading App */
+
+.tab-btn {
+    @apply py-2 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-300 hover:border-gray-300 transition-colors duration-200;
+}
+
+.tab-btn.active {
+    @apply border-blue-500 text-blue-400;
+}
+
+.tab-content {
+    @apply hidden;
+}
+
+.tab-content.active {
+    @apply block;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6B7280;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
+
+/* Status badges */
+.status-open {
+    @apply bg-yellow-600 text-yellow-100 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-closed {
+    @apply bg-gray-600 text-gray-100 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-cancelled {
+    @apply bg-red-600 text-red-100 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+/* Direction badges */
+.direction-long {
+    @apply bg-green-600 text-green-100 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.direction-short {
+    @apply bg-red-600 text-red-100 px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+/* P&L styling */
+.pnl-positive {
+    @apply text-green-400 font-semibold;
+}
+
+.pnl-negative {
+    @apply text-red-400 font-semibold;
+}
+
+.pnl-neutral {
+    @apply text-gray-400 font-semibold;
+}
+
+/* Card hover effects */
+.card-hover {
+    @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Screenshot grid */
+.screenshot-item {
+    @apply bg-gray-700 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-200;
+}
+
+.screenshot-item img {
+    @apply w-full h-48 object-cover;
+}
+
+/* Form enhancements */
+.form-input {
+    @apply w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 transition-colors duration-200;
+}
+
+.form-select {
+    @apply w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 transition-colors duration-200;
+}
+
+.form-textarea {
+    @apply w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 transition-colors duration-200 resize-vertical;
+}
+
+/* Button styles */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Loading animation */
+.loading-spinner {
+    @apply animate-spin rounded-full border-b-2 border-blue-400;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+/* Stats card animations */
+.stats-card {
+    @apply bg-gray-800 p-6 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:bg-gray-750;
+}
+
+/* Table styles */
+.table-row {
+    @apply hover:bg-gray-700 transition-colors duration-150;
+}
+
+/* Risk-reward ratio styling */
+.rr-excellent {
+    @apply text-green-400 font-bold;
+}
+
+.rr-good {
+    @apply text-blue-400 font-semibold;
+}
+
+.rr-fair {
+    @apply text-yellow-400;
+}
+
+.rr-poor {
+    @apply text-red-400;
+}
+
+/* Strategy badges */
+.strategy-liquidity-grab {
+    @apply bg-purple-600 text-purple-100 px-2 py-1 rounded-full text-xs;
+}
+
+.strategy-order-block {
+    @apply bg-blue-600 text-blue-100 px-2 py-1 rounded-full text-xs;
+}
+
+.strategy-fair-value-gap {
+    @apply bg-green-600 text-green-100 px-2 py-1 rounded-full text-xs;
+}
+
+.strategy-break-of-structure {
+    @apply bg-orange-600 text-orange-100 px-2 py-1 rounded-full text-xs;
+}
+
+.strategy-change-of-character {
+    @apply bg-pink-600 text-pink-100 px-2 py-1 rounded-full text-xs;
+}
+
+.strategy-inducement {
+    @apply bg-indigo-600 text-indigo-100 px-2 py-1 rounded-full text-xs;
+}
+
+/* Session badges */
+.session-london {
+    @apply bg-red-600 text-red-100 px-2 py-1 rounded-full text-xs;
+}
+
+.session-new-york {
+    @apply bg-blue-600 text-blue-100 px-2 py-1 rounded-full text-xs;
+}
+
+.session-asian {
+    @apply bg-yellow-600 text-yellow-100 px-2 py-1 rounded-full text-xs;
+}
+
+.session-overlap {
+    @apply bg-purple-600 text-purple-100 px-2 py-1 rounded-full text-xs;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .modal-content {
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Dark theme enhancements */
+.bg-gray-750 {
+    background-color: #3f4147;
+}
+
+/* Custom focus styles */
+.focus-ring:focus {
+    @apply ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* Notification styles */
+.notification {
+    @apply fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300;
+}
+
+.notification-success {
+    @apply bg-green-600 text-white;
+}
+
+.notification-error {
+    @apply bg-red-600 text-white;
+}
+
+.notification-info {
+    @apply bg-blue-600 text-white;
+}
+
+.notification-warning {
+    @apply bg-yellow-600 text-white;
+}
