@@ -8,9 +8,7 @@ fastify.register(require('@fastify/cors'), {
   credentials: true
 });
 
-fastify.register(require('@fastify/jwt'), {
-  secret: process.env.JWT_SECRET
-});
+// JWT removed - no authentication required
 
 fastify.register(require('@fastify/multipart'));
 
@@ -19,8 +17,7 @@ fastify.register(require('@fastify/static'), {
   prefix: '/'
 });
 
-// Import routes
-fastify.register(require('./routes/auth'));
+// Import routes (auth removed)
 fastify.register(require('./routes/trades'));
 fastify.register(require('./routes/screenshots'));
 fastify.register(require('./routes/analytics'));

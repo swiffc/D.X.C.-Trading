@@ -3,17 +3,8 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
 async function screenshotsRoutes(fastify, options) {
-  // Authentication middleware
-  const authenticate = async (request, reply) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
-    }
-  };
-
   // Upload screenshot
-  fastify.post('/api/screenshots/upload', { preHandler: authenticate }, async (request, reply) => {
+  fastify.post('/api/screenshots/upload', async (request, reply) => {
     try {
       const data = await request.file();
       
@@ -32,7 +23,7 @@ async function screenshotsRoutes(fastify, options) {
       // Generate unique filename
       const fileExtension = path.extname(data.filename);
       const fileName = `${uuidv4()}${fileExtension}`;
-      const filePath = `screenshots/${request.user.userId}/${fileName}`;
+      const filePath = `screenshots/default-user/${fileName}`;
 
       // Convert buffer to base64 for Supabase storage
       const buffer = await data.toBuffer();
@@ -57,7 +48,7 @@ async function screenshotsRoutes(fastify, options) {
       // Save screenshot metadata to database
       const screenshot = {
         id: uuidv4(),
-        user_id: request.user.userId,
+        user_id: '00000000-0000-0000-0000-000000000001',
         trade_id: trade_id?.value || null,
         filename: data.filename,
         file_path: filePath,
@@ -91,14 +82,14 @@ async function screenshotsRoutes(fastify, options) {
   });
 
   // Get screenshots for user
-  fastify.get('/api/screenshots', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/screenshots', async (request, reply) => {
     try {
       const { trade_id, screenshot_type, limit = 50, offset = 0 } = request.query;
       
       let query = supabase
         .from('screenshots')
         .select('*')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false });
 
       if (trade_id) query = query.eq('trade_id', trade_id);
@@ -119,13 +110,13 @@ async function screenshotsRoutes(fastify, options) {
   });
 
   // Get single screenshot
-  fastify.get('/api/screenshots/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/screenshots/:id', async (request, reply) => {
     try {
       const { data, error } = await supabase
         .from('screenshots')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (error) {
@@ -139,7 +130,7 @@ async function screenshotsRoutes(fastify, options) {
   });
 
   // Update screenshot metadata
-  fastify.put('/api/screenshots/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.put('/api/screenshots/:id', async (request, reply) => {
     try {
       const { description, screenshot_type, trade_id } = request.body;
       
@@ -155,7 +146,7 @@ async function screenshotsRoutes(fastify, options) {
         .from('screenshots')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .select()
         .single();
 
@@ -170,14 +161,14 @@ async function screenshotsRoutes(fastify, options) {
   });
 
   // Delete screenshot
-  fastify.delete('/api/screenshots/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.delete('/api/screenshots/:id', async (request, reply) => {
     try {
       // Get screenshot data first
       const { data: screenshot, error: fetchError } = await supabase
         .from('screenshots')
         .select('file_path')
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (fetchError) {
@@ -198,7 +189,7 @@ async function screenshotsRoutes(fastify, options) {
         .from('screenshots')
         .delete()
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId);
+        .eq('user_id', '00000000-0000-0000-0000-000000000001');
 
       if (dbError) {
         return reply.code(400).send({ error: dbError.message });
@@ -211,13 +202,13 @@ async function screenshotsRoutes(fastify, options) {
   });
 
   // Get screenshots for specific trade
-  fastify.get('/api/trades/:trade_id/screenshots', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/trades/:trade_id/screenshots', async (request, reply) => {
     try {
       const { data, error } = await supabase
         .from('screenshots')
         .select('*')
         .eq('trade_id', request.params.trade_id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false });
 
       if (error) {

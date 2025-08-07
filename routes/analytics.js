@@ -1,17 +1,8 @@
 const { supabase } = require('../config/supabase');
 
 async function analyticsRoutes(fastify, options) {
-  // Authentication middleware
-  const authenticate = async (request, reply) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
-    }
-  };
-
   // Get trading statistics
-  fastify.get('/api/analytics/stats', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/analytics/stats', async (request, reply) => {
     try {
       const { period = '30d' } = request.query;
       
@@ -40,7 +31,7 @@ async function analyticsRoutes(fastify, options) {
       const { data: trades, error } = await supabase
         .from('trades')
         .select('*')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false });
 
@@ -134,7 +125,7 @@ async function analyticsRoutes(fastify, options) {
   });
 
   // Get P&L chart data
-  fastify.get('/api/analytics/pnl-chart', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/analytics/pnl-chart', async (request, reply) => {
     try {
       const { period = '30d' } = request.query;
       
@@ -163,7 +154,7 @@ async function analyticsRoutes(fastify, options) {
       const { data: trades, error } = await supabase
         .from('trades')
         .select('exit_time, pnl')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .eq('status', 'closed')
         .gte('exit_time', startDate.toISOString())
         .order('exit_time', { ascending: true });
@@ -190,14 +181,14 @@ async function analyticsRoutes(fastify, options) {
   });
 
   // Get recent trades
-  fastify.get('/api/analytics/recent-trades', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/analytics/recent-trades', async (request, reply) => {
     try {
       const { limit = 10 } = request.query;
 
       const { data: trades, error } = await supabase
         .from('trades')
         .select('*')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false })
         .limit(parseInt(limit));
 
@@ -212,7 +203,7 @@ async function analyticsRoutes(fastify, options) {
   });
 
   // Get BTMM specific analytics
-  fastify.get('/api/analytics/btmm', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/analytics/btmm', async (request, reply) => {
     try {
       const { period = '30d' } = request.query;
       
@@ -241,7 +232,7 @@ async function analyticsRoutes(fastify, options) {
       const { data: trades, error } = await supabase
         .from('trades')
         .select('*')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .eq('status', 'closed')
         .gte('created_at', startDate.toISOString());
 

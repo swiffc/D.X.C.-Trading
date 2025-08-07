@@ -2,17 +2,8 @@ const { supabase } = require('../config/supabase');
 const { v4: uuidv4 } = require('uuid');
 
 async function tradesRoutes(fastify, options) {
-  // Authentication middleware
-  const authenticate = async (request, reply) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
-    }
-  };
-
   // Create new trade
-  fastify.post('/api/trades', { preHandler: authenticate }, async (request, reply) => {
+  fastify.post('/api/trades', async (request, reply) => {
     try {
       const {
         symbol,
@@ -31,7 +22,7 @@ async function tradesRoutes(fastify, options) {
 
       const trade = {
         id: uuidv4(),
-        user_id: request.user.userId,
+        user_id: '00000000-0000-0000-0000-000000000001', // Default user ID since no auth
         symbol,
         direction,
         entry_price: parseFloat(entry_price),
@@ -71,14 +62,14 @@ async function tradesRoutes(fastify, options) {
   });
 
   // Get all trades for user
-  fastify.get('/api/trades', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/trades', async (request, reply) => {
     try {
       const { status, symbol, strategy, limit = 50, offset = 0 } = request.query;
       
       let query = supabase
         .from('trades')
         .select('*')
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false });
 
       if (status) query = query.eq('status', status);
@@ -100,13 +91,13 @@ async function tradesRoutes(fastify, options) {
   });
 
   // Get single trade
-  fastify.get('/api/trades/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.get('/api/trades/:id', async (request, reply) => {
     try {
       const { data, error } = await supabase
         .from('trades')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (error) {
@@ -120,7 +111,7 @@ async function tradesRoutes(fastify, options) {
   });
 
   // Update trade
-  fastify.put('/api/trades/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.put('/api/trades/:id', async (request, reply) => {
     try {
       const updates = { ...request.body };
       updates.updated_at = new Date().toISOString();
@@ -146,7 +137,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .select()
         .single();
 
@@ -161,7 +152,7 @@ async function tradesRoutes(fastify, options) {
   });
 
   // Close trade
-  fastify.post('/api/trades/:id/close', { preHandler: authenticate }, async (request, reply) => {
+  fastify.post('/api/trades/:id/close', async (request, reply) => {
     try {
       const { exit_price, exit_reason, notes } = request.body;
 
@@ -180,7 +171,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (!currentTrade) {
@@ -207,7 +198,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId)
+        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .select()
         .single();
 
@@ -222,13 +213,13 @@ async function tradesRoutes(fastify, options) {
   });
 
   // Delete trade
-  fastify.delete('/api/trades/:id', { preHandler: authenticate }, async (request, reply) => {
+  fastify.delete('/api/trades/:id', async (request, reply) => {
     try {
       const { error } = await supabase
         .from('trades')
         .delete()
         .eq('id', request.params.id)
-        .eq('user_id', request.user.userId);
+        .eq('user_id', '00000000-0000-0000-0000-000000000001');
 
       if (error) {
         return reply.code(400).send({ error: error.message });

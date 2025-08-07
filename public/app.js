@@ -1,33 +1,17 @@
-// BTMM Trading App Frontend JavaScript
+// BTMM Trading App Frontend JavaScript (No Authentication)
 
 class TradingApp {
     constructor() {
-        this.token = localStorage.getItem('token');
-        this.user = null;
         this.currentTab = 'trades';
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        this.initializeGoogleAuth();
-        if (this.token) {
-            this.loadUser();
-        } else {
-            this.showAuthSection();
-        }
+        this.loadDashboardData();
     }
 
     setupEventListeners() {
-        // Auth buttons
-        document.getElementById('login-btn').addEventListener('click', () => this.showLoginForm());
-        document.getElementById('register-btn').addEventListener('click', () => this.showRegisterForm());
-        document.getElementById('logout-btn').addEventListener('click', () => this.logout());
-
-        // Auth forms
-        document.getElementById('login-form-element').addEventListener('submit', (e) => this.handleLogin(e));
-        document.getElementById('register-form-element').addEventListener('submit', (e) => this.handleRegister(e));
-
         // Tab navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
@@ -42,199 +26,7 @@ class TradingApp {
         document.getElementById('cancel-upload').addEventListener('click', () => this.hideUploadModal());
     }
 
-    // Initialize Google OAuth
-    initializeGoogleAuth() {
-        window.onload = () => {
-            if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({
-                    client_id: '1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com', // You'll need to replace this with your actual Google Client ID
-                    callback: this.handleGoogleSignIn.bind(this)
-                });
-
-                // Render Google Sign-In buttons
-                google.accounts.id.renderButton(
-                    document.getElementById('google-signin-button'),
-                    {
-                        theme: 'filled_blue',
-                        size: 'large',
-                        width: '100%',
-                        text: 'signin_with'
-                    }
-                );
-
-                google.accounts.id.renderButton(
-                    document.getElementById('google-signin-button-register'),
-                    {
-                        theme: 'filled_blue',
-                        size: 'large',
-                        width: '100%',
-                        text: 'signup_with'
-                    }
-                );
-            }
-        };
-    }
-
-    // Handle Google Sign-In response
-    async handleGoogleSignIn(response) {
-        this.showLoading();
-
-        try {
-            const apiResponse = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token: response.credential })
-            });
-
-            const data = await apiResponse.json();
-
-            if (apiResponse.ok) {
-                this.token = data.token;
-                this.user = data.user;
-                localStorage.setItem('token', this.token);
-                this.showDashboard();
-                this.showNotification(data.message || 'Google sign-in successful!', 'success');
-            } else {
-                this.showNotification(data.error || 'Google sign-in failed', 'error');
-            }
-        } catch (error) {
-            this.showNotification('Network error. Please try again.', 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    // Authentication methods
-    async handleLogin(e) {
-        e.preventDefault();
-        this.showLoading();
-
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.token = data.token;
-                this.user = data.user;
-                localStorage.setItem('token', this.token);
-                this.showDashboard();
-                this.showNotification('Login successful!', 'success');
-            } else {
-                this.showNotification(data.error || 'Login failed', 'error');
-            }
-        } catch (error) {
-            this.showNotification('Network error. Please try again.', 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async handleRegister(e) {
-        e.preventDefault();
-        this.showLoading();
-
-        const firstName = document.getElementById('register-firstname').value;
-        const lastName = document.getElementById('register-lastname').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ firstName, lastName, email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.token = data.token;
-                this.user = data.user;
-                localStorage.setItem('token', this.token);
-                this.showDashboard();
-                this.showNotification('Registration successful!', 'success');
-            } else {
-                this.showNotification(data.error || 'Registration failed', 'error');
-            }
-        } catch (error) {
-            this.showNotification('Network error. Please try again.', 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async loadUser() {
-        try {
-            const response = await fetch('/api/auth/me', {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                this.user = data.user;
-                this.showDashboard();
-            } else {
-                this.logout();
-            }
-        } catch (error) {
-            this.logout();
-        }
-    }
-
-    logout() {
-        this.token = null;
-        this.user = null;
-        localStorage.removeItem('token');
-        this.showAuthSection();
-    }
-
     // UI methods
-    showAuthSection() {
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('user-info').classList.add('hidden');
-        document.getElementById('auth-buttons').classList.remove('hidden');
-    }
-
-    showDashboard() {
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('auth-buttons').classList.add('hidden');
-        
-        if (this.user) {
-            document.getElementById('user-name').textContent = `${this.user.first_name} ${this.user.last_name}`;
-        }
-
-        this.loadDashboardData();
-    }
-
-    showLoginForm() {
-        document.getElementById('login-form').classList.remove('hidden');
-        document.getElementById('register-form').classList.add('hidden');
-    }
-
-    showRegisterForm() {
-        document.getElementById('register-form').classList.remove('hidden');
-        document.getElementById('login-form').classList.add('hidden');
-    }
-
     switchTab(tabName) {
         // Update tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -276,11 +68,7 @@ class TradingApp {
 
     async loadStats() {
         try {
-            const response = await fetch('/api/analytics/stats', {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
+            const response = await fetch('/api/analytics/stats');
 
             if (response.ok) {
                 const data = await response.json();
@@ -300,11 +88,7 @@ class TradingApp {
 
     async loadTrades() {
         try {
-            const response = await fetch('/api/trades', {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
+            const response = await fetch('/api/trades');
 
             if (response.ok) {
                 const data = await response.json();
@@ -395,8 +179,7 @@ class TradingApp {
             const response = await fetch('/api/trades', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
@@ -430,8 +213,7 @@ class TradingApp {
             const response = await fetch(`/api/trades/${tradeId}/close`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     exit_price: parseFloat(exitPrice),
@@ -461,10 +243,7 @@ class TradingApp {
 
         try {
             const response = await fetch(`/api/trades/${tradeId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                method: 'DELETE'
             });
 
             if (response.ok) {
@@ -513,9 +292,6 @@ class TradingApp {
         try {
             const response = await fetch('/api/screenshots/upload', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                },
                 body: formData
             });
 
@@ -539,11 +315,7 @@ class TradingApp {
 
     async loadScreenshots() {
         try {
-            const response = await fetch('/api/screenshots', {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
+            const response = await fetch('/api/screenshots');
 
             if (response.ok) {
                 const data = await response.json();
@@ -592,10 +364,7 @@ class TradingApp {
 
         try {
             const response = await fetch(`/api/screenshots/${screenshotId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                method: 'DELETE'
             });
 
             if (response.ok) {
@@ -616,12 +385,8 @@ class TradingApp {
     async loadAnalytics() {
         try {
             const [statsResponse, btmmResponse] = await Promise.all([
-                fetch('/api/analytics/stats', {
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                }),
-                fetch('/api/analytics/btmm', {
-                    headers: { 'Authorization': `Bearer ${this.token}` }
-                })
+                fetch('/api/analytics/stats'),
+                fetch('/api/analytics/btmm')
             ]);
 
             if (statsResponse.ok && btmmResponse.ok) {
