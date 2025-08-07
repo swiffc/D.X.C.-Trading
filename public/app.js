@@ -340,15 +340,16 @@ class TradingApp {
             item.className = 'screenshot-item';
             
             item.innerHTML = `
-                <img src="${screenshot.file_url}" alt="${screenshot.description}" class="w-full h-48 object-cover">
+                <img src="${screenshot.public_url}" alt="${screenshot.title || screenshot.original_name}" class="w-full h-48 object-cover">
                 <div class="p-4">
                     <div class="flex justify-between items-start mb-2">
-                        <span class="text-sm font-semibold">${screenshot.screenshot_type.replace('_', ' ').toUpperCase()}</span>
+                        <span class="text-sm font-semibold">${(screenshot.pattern_type || 'entry').replace('_', ' ').toUpperCase()}</span>
                         <button onclick="app.deleteScreenshot('${screenshot.id}')" class="text-red-400 hover:text-red-300">
                             <i class="fas fa-trash text-sm"></i>
                         </button>
                     </div>
-                    <p class="text-gray-300 text-sm mb-2">${screenshot.description || 'No description'}</p>
+                    <p class="text-gray-300 text-sm mb-2 font-semibold">${screenshot.title || screenshot.original_name}</p>
+                    <p class="text-gray-400 text-sm mb-2">${screenshot.study_notes || 'No notes'}</p>
                     <p class="text-gray-500 text-xs">${new Date(screenshot.created_at).toLocaleDateString()}</p>
                 </div>
             `;

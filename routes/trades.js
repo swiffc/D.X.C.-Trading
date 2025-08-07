@@ -21,23 +21,19 @@ async function tradesRoutes(fastify, options) {
       } = request.body;
 
       const trade = {
-        id: uuidv4(),
-        user_id: '00000000-0000-0000-0000-000000000001', // Default user ID since no auth
-        symbol,
-        direction,
+        pair: symbol,
+        trade_date: new Date().toISOString().split('T')[0],
+        setup_type: strategy || 'manual',
+        session: session || 'london',
+        daily_bias: market_structure || 'bullish',
+        timeframe: 'M15 (15-minute)',
+        entry_time: new Date().toISOString(),
         entry_price: parseFloat(entry_price),
         stop_loss: parseFloat(stop_loss),
         take_profit: parseFloat(take_profit),
-        position_size: parseFloat(position_size),
-        risk_amount: parseFloat(risk_amount),
-        strategy,
-        market_structure,
-        entry_reason,
-        notes,
-        session,
-        status: 'open',
-        entry_time: new Date().toISOString(),
-        created_at: new Date().toISOString()
+        trade_result: 'open',
+        r_multiple: 0,
+        notes: notes || entry_reason || ''
       };
 
       // Calculate risk-reward ratio
@@ -69,7 +65,7 @@ async function tradesRoutes(fastify, options) {
       let query = supabase
         .from('trades')
         .select('*')
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
+
         .order('created_at', { ascending: false });
 
       if (status) query = query.eq('status', status);
@@ -97,7 +93,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
+
         .single();
 
       if (error) {
@@ -137,7 +133,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
+
         .select()
         .single();
 
@@ -171,7 +167,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
+
         .single();
 
       if (!currentTrade) {
@@ -198,7 +194,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
+
         .select()
         .single();
 
@@ -219,7 +215,7 @@ async function tradesRoutes(fastify, options) {
         .from('trades')
         .delete()
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001');
+;
 
       if (error) {
         return reply.code(400).send({ error: error.message });

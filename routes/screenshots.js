@@ -45,19 +45,19 @@ async function screenshotsRoutes(fastify, options) {
         .from('trading-screenshots')
         .getPublicUrl(filePath);
 
-      // Save screenshot metadata to database
+      // Save screenshot metadata to database (matching your schema)
       const screenshot = {
-        id: uuidv4(),
-        user_id: '00000000-0000-0000-0000-000000000001',
-        trade_id: trade_id?.value || null,
-        filename: data.filename,
+        filename: fileName,
+        original_name: data.filename,
         file_path: filePath,
-        file_url: urlData.publicUrl,
+        public_url: urlData.publicUrl,
+        pattern_type: screenshot_type?.value || 'entry',
+        title: description?.value || data.filename,
+        study_notes: description?.value || '',
+        setup_type: screenshot_type?.value || 'entry',
+        trade_id: trade_id?.value ? parseInt(trade_id.value) : null,
         file_size: buffer.length,
-        mime_type: data.mimetype,
-        screenshot_type: screenshot_type?.value || 'entry',
-        description: description?.value || '',
-        created_at: new Date().toISOString()
+        mime_type: data.mimetype
       };
 
       const { data: dbData, error: dbError } = await supabase
@@ -81,19 +81,18 @@ async function screenshotsRoutes(fastify, options) {
     }
   });
 
-  // Get screenshots for user
+  // Get screenshots
   fastify.get('/api/screenshots', async (request, reply) => {
     try {
-      const { trade_id, screenshot_type, limit = 50, offset = 0 } = request.query;
+      const { trade_id, pattern_type, limit = 50, offset = 0 } = request.query;
       
       let query = supabase
         .from('screenshots')
         .select('*')
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false });
 
       if (trade_id) query = query.eq('trade_id', trade_id);
-      if (screenshot_type) query = query.eq('screenshot_type', screenshot_type);
+      if (pattern_type) query = query.eq('pattern_type', pattern_type);
 
       query = query.range(offset, offset + limit - 1);
 
@@ -116,7 +115,6 @@ async function screenshotsRoutes(fastify, options) {
         .from('screenshots')
         .select('*')
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (error) {
@@ -132,21 +130,21 @@ async function screenshotsRoutes(fastify, options) {
   // Update screenshot metadata
   fastify.put('/api/screenshots/:id', async (request, reply) => {
     try {
-      const { description, screenshot_type, trade_id } = request.body;
+      const { study_notes, pattern_type, trade_id, title } = request.body;
       
       const updates = {
         updated_at: new Date().toISOString()
       };
 
-      if (description !== undefined) updates.description = description;
-      if (screenshot_type !== undefined) updates.screenshot_type = screenshot_type;
+      if (study_notes !== undefined) updates.study_notes = study_notes;
+      if (pattern_type !== undefined) updates.pattern_type = pattern_type;
       if (trade_id !== undefined) updates.trade_id = trade_id;
+      if (title !== undefined) updates.title = title;
 
       const { data, error } = await supabase
         .from('screenshots')
         .update(updates)
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .select()
         .single();
 
@@ -168,7 +166,6 @@ async function screenshotsRoutes(fastify, options) {
         .from('screenshots')
         .select('file_path')
         .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .single();
 
       if (fetchError) {
@@ -188,8 +185,7 @@ async function screenshotsRoutes(fastify, options) {
       const { error: dbError } = await supabase
         .from('screenshots')
         .delete()
-        .eq('id', request.params.id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001');
+        .eq('id', request.params.id);
 
       if (dbError) {
         return reply.code(400).send({ error: dbError.message });
@@ -208,7 +204,6 @@ async function screenshotsRoutes(fastify, options) {
         .from('screenshots')
         .select('*')
         .eq('trade_id', request.params.trade_id)
-        .eq('user_id', '00000000-0000-0000-0000-000000000001')
         .order('created_at', { ascending: false });
 
       if (error) {
