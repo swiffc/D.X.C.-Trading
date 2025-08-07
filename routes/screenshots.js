@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
@@ -28,8 +28,8 @@ async function screenshotsRoutes(fastify, options) {
       // Convert buffer to base64 for Supabase storage
       const buffer = await data.toBuffer();
       
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // Upload to Supabase Storage using admin client for no-auth
+      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('trade-screenshots')
         .upload(filePath, buffer, {
           contentType: data.mimetype,
@@ -41,7 +41,7 @@ async function screenshotsRoutes(fastify, options) {
       }
 
       // Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = supabaseAdmin.storage
         .from('trade-screenshots')
         .getPublicUrl(filePath);
 
@@ -68,7 +68,7 @@ async function screenshotsRoutes(fastify, options) {
 
       if (dbError) {
         // Clean up uploaded file if database insert fails
-        await supabase.storage.from('trade-screenshots').remove([filePath]);
+        await supabaseAdmin.storage.from('trade-screenshots').remove([filePath]);
         return reply.code(400).send({ error: dbError.message });
       }
 
@@ -176,7 +176,7 @@ async function screenshotsRoutes(fastify, options) {
       }
 
       // Delete from storage
-      const { error: storageError } = await supabase.storage
+      const { error: storageError } = await supabaseAdmin.storage
         .from('trade-screenshots')
         .remove([screenshot.file_path]);
 
