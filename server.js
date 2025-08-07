@@ -32,16 +32,21 @@ fastify.get('/', async (request, reply) => {
   return reply.sendFile('index.html');
 });
 
-// Start server
-const start = async () => {
-  try {
-    const port = process.env.PORT || 5000;
-    await fastify.listen({ port, host: '0.0.0.0' });
-    console.log(`🚀 BTMM Trading App running on http://localhost:${port}`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
-};
+// For Vercel deployment
+if (require.main === module) {
+  // Start server locally
+  const start = async () => {
+    try {
+      const port = process.env.PORT || 5000;
+      await fastify.listen({ port, host: '0.0.0.0' });
+      console.log(`🚀 BTMM Trading App running on http://localhost:${port}`);
+    } catch (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    }
+  };
+  start();
+}
 
-start();
+// Export for Vercel
+module.exports = fastify;
