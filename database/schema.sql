@@ -137,21 +137,21 @@ CREATE POLICY "Users can update own BTMM setups" ON btmm_setups FOR UPDATE USING
 CREATE POLICY "Users can delete own BTMM setups" ON btmm_setups FOR DELETE USING (auth.uid() = user_id);
 
 -- Create storage bucket for screenshots
-INSERT INTO storage.buckets (id, name, public) VALUES ('trade-screenshots', 'trade-screenshots', true);
+INSERT INTO storage.buckets (id, name, public) VALUES ('trading-screenshots', 'trading-screenshots', true);
 
 -- Storage policies for screenshots
 CREATE POLICY "Users can upload own screenshots" ON storage.objects FOR INSERT WITH CHECK (
-    bucket_id = 'trade-screenshots' AND 
+    bucket_id = 'trading-screenshots' AND 
     auth.uid()::text = (storage.foldername(name))[1]
 );
 
 CREATE POLICY "Users can view own screenshots" ON storage.objects FOR SELECT USING (
-    bucket_id = 'trade-screenshots' AND 
+    bucket_id = 'trading-screenshots' AND 
     auth.uid()::text = (storage.foldername(name))[1]
 );
 
 CREATE POLICY "Users can delete own screenshots" ON storage.objects FOR DELETE USING (
-    bucket_id = 'trade-screenshots' AND 
+    bucket_id = 'trading-screenshots' AND 
     auth.uid()::text = (storage.foldername(name))[1]
 );
 

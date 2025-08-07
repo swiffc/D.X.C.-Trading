@@ -30,7 +30,7 @@ async function screenshotsRoutes(fastify, options) {
       
       // Upload to Supabase Storage using admin client for no-auth
       const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-        .from('trade-screenshots')
+        .from('trading-screenshots')
         .upload(filePath, buffer, {
           contentType: data.mimetype,
           upsert: false
@@ -42,7 +42,7 @@ async function screenshotsRoutes(fastify, options) {
 
       // Get public URL
       const { data: urlData } = supabaseAdmin.storage
-        .from('trade-screenshots')
+        .from('trading-screenshots')
         .getPublicUrl(filePath);
 
       // Save screenshot metadata to database
@@ -68,7 +68,7 @@ async function screenshotsRoutes(fastify, options) {
 
       if (dbError) {
         // Clean up uploaded file if database insert fails
-        await supabaseAdmin.storage.from('trade-screenshots').remove([filePath]);
+        await supabaseAdmin.storage.from('trading-screenshots').remove([filePath]);
         return reply.code(400).send({ error: dbError.message });
       }
 
@@ -177,7 +177,7 @@ async function screenshotsRoutes(fastify, options) {
 
       // Delete from storage
       const { error: storageError } = await supabaseAdmin.storage
-        .from('trade-screenshots')
+        .from('trading-screenshots')
         .remove([screenshot.file_path]);
 
       if (storageError) {
